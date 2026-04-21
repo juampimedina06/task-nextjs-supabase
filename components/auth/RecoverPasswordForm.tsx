@@ -11,6 +11,7 @@ import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthFormProps } from "./AuthForm";
+import { sendRecoveryEmail } from "@/actions/auth/auth";
 
 // ✅ Schema correcto
 const formSchema = z.object({
@@ -34,8 +35,15 @@ const RecoverPasswordForm = ({ setTypeSelected }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      console.log(data);
-      toast.success("Correo enviado (mock)");
+      const res = await sendRecoveryEmail(data);
+
+      if(res.success){
+        toast.success("Se ha enviado un correo de recuperación. Por favor, revisa tu bandeja de entrada.", {duration: 5000});
+        setTypeSelected("sign-in");
+      } else {
+        toast.error(res.error || "Error al enviar el correo");
+      }
+      
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error inesperado";

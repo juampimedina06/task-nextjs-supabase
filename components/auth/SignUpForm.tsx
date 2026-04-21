@@ -11,6 +11,7 @@ import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthFormProps } from "./AuthForm";
+import { signup } from "@/actions/auth/auth";
 
 const formSchema = z.object({
   name: z
@@ -30,6 +31,7 @@ const SignUpForm = ({ setTypeSelected }: AuthFormProps) => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -38,8 +40,17 @@ const SignUpForm = ({ setTypeSelected }: AuthFormProps) => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      console.log(data);
-      toast.success("Registro OK (mock)");
+      const res = await signup(data)
+
+      if(res.success){
+        toast.success(`Bienvenido ${data.name} Te hemos enviado un correo para verificar tu cuenta`,{
+          duration: 3000,
+          icon: '🎉'
+          })
+        reset();
+        setTypeSelected('sign-in');
+      }
+
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error inesperado";

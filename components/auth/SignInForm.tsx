@@ -11,6 +11,9 @@ import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthFormProps } from "./AuthForm";
+import { Google } from "../svg/Google";
+import { GitHub } from "../svg/Github";
+import { login } from "@/actions/auth/auth";
 
 const formSchema = z.object({
   email: z.string().email("Correo inválido"),
@@ -33,8 +36,17 @@ const SignInForm = ({ setTypeSelected }: AuthFormProps) => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      console.log(data);
-      toast.success("Login OK (mock)");
+      
+      const res = await login(data);
+
+      if(res.success){
+        toast.success("Inicio de sesion exitoso");
+        window.location.reload();
+      } else {
+        toast.error(res.error || "Error al iniciar sesión");
+      }
+
+
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error inesperado";
@@ -123,6 +135,7 @@ const SignInForm = ({ setTypeSelected }: AuthFormProps) => {
             onClick={googleSignIn}
             disabled={isLoading}
           >
+            <Google />
             Google
           </Button>
 
@@ -132,6 +145,7 @@ const SignInForm = ({ setTypeSelected }: AuthFormProps) => {
             onClick={githubSignIn}
             disabled={isLoading}
           >
+            <GitHub />
             Github
           </Button>
         </div>

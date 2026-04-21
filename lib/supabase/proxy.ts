@@ -15,13 +15,18 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+
           supabaseResponse = NextResponse.next({
             request,
           })
+
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
+
           Object.entries(headers).forEach(([key, value]) =>
             supabaseResponse.headers.set(key, value)
           )
@@ -30,13 +35,35 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // Obtener usuario correctamente desde el mismo cliente
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // IMPORTANT: If you remove getClaims() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
-  await supabase.auth.getClaims()
+  const protectedRoutes = [
+    '/dashboard',
+    '/profile',
+    '/update-password',
+  ]
+
+  const pathname = request.nextUrl.pathname
+
+  // Detectar rutas protegidas (incluye subrutas)
+  const isProtected = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  )
+
+  // No autenticado → redirigir al login
+  if (!user && isProtected) {
+    const loginUrl = new URL('/', request.url)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  //  Autenticado → evitar volver al login
+  if (user && pathname === '/') {
+    const dashboardUrl = new URL('/dashboard', request.url)
+    return NextResponse.redirect(dashboardUrl)
+  }
 
   return supabaseResponse
 }
