@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"; // Shadcn Label (opcional, puedes usar <label>)
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import PhoneInput from "@/components/PhoneInput";
 import { updateAvatar } from "@/actions/auth/update-avatar";
@@ -55,7 +55,7 @@ export default function AccountForm({
       email: user?.email || "",
       avatar_url: user?.avatar_url || null,
       phone: user?.phone || "",
-      country_code: user?.country_code || "VE",
+      country_code: user?.country_code || null,
     },
   });
 
@@ -70,7 +70,7 @@ export default function AccountForm({
         email: user.email || "",
         avatar_url: user.avatar_url || null,
         phone: user.phone || "",
-        country_code: user.country_code || "VE",
+        country_code: user.country_code || null,
       });
       setAvatarUrl(user.avatar_url || null);
     }
@@ -131,10 +131,14 @@ export default function AccountForm({
         toast.success("Avatar actualizado con éxito");
       }
     } catch (error) {
-      if ((error.message = " Body exceeded 1 MB limit.")) {
-        toast.error("La imagen es muy grande. Máximo 1MB.");
+      if (error instanceof Error) {
+        if (error.message.includes("Body exceeded 1 MB limit")) {
+          toast.error("La imagen es muy grande. Máximo 1MB.");
+        } else {
+          toast.error("Hubo un error al actualizar la imagen.");
+        }
       } else {
-        toast.error("Hubo un error al actualizar la imagen.");
+        toast.error("Ocurrió un error inesperado.");
       }
     } finally {
       setIsLoadingImage(false);
@@ -207,6 +211,7 @@ export default function AccountForm({
         </div>
 
         {/* Campo Teléfono (Controlado manualmente) */}
+
         <div className="space-y-2">
           <Label htmlFor="phone">Número de Teléfono</Label>
           <PhoneInput
@@ -223,7 +228,11 @@ export default function AccountForm({
           )}
         </div>
 
-        <Button type="submit" className="w-full mt-6" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full mt-6 cursor-pointer"
+          disabled={loading}
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

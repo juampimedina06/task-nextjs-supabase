@@ -61,21 +61,14 @@ const UserProfile: React.FC<UserProfileProps> = ({
   className = "",
 }) => {
   const { user, isLoading, getUserData } = useAuth();
-  const [profile, setProfile] = useState<UserProfileData | null>(
-    user as UserProfileData,
-  );
+  const profile = user as UserProfileData | null;
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleEditClick = () => {
     setIsEditDialogOpen(true);
     if (onEditProfile) onEditProfile();
   };
-
-  useEffect(() => {
-    if (user) {
-      setProfile(user);
-    }
-  }, [user]);
 
   if (isLoading) {
     return (
@@ -177,7 +170,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             <div className="grid gap-4">
               <Button
                 variant="outline"
-                className="w-full justify-start h-14"
+                className="w-full justify-start h-14 cursor-pointer"
                 onClick={handleEditClick}
               >
                 <Edit className="mr-3 h-5 w-5 text-primary" />
@@ -192,7 +185,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <Link href="/update-password" intermediate-link="true">
                 <Button
                   variant="outline"
-                  className="w-full justify-start h-14"
+                  className="w-full justify-start h-14 cursor-pointer"
                   onClick={onChangePassword}
                 >
                   <Key className="mr-3 h-5 w-5 text-primary" />
@@ -204,11 +197,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   </div>
                 </Button>
               </Link>
-
-              <form>
+              <form action="/api/auth/signout" method="post">
                 <Button
                   variant="outline"
-                  className="w-full justify-start h-14 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+                  className="w-full justify-start h-14 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                   onClick={onLogout}
                 >
                   <LogOut className="mr-3 h-5 w-5" />
